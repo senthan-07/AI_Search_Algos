@@ -12,7 +12,7 @@ struct PQElement {
 };
 
 pair<vector<char>, int> aStarSearch(
-    unordered_map<char, unordered_map<char, int>> &edges,
+    unordered_map<char, vector<pair<char, int>>> &graph,
     unordered_map<char, int> &heuristic,
     char start, char goal)
 {
@@ -25,13 +25,13 @@ pair<vector<char>, int> aStarSearch(
         PQElement current = pq.top();
         pq.pop();
 
-        cout << "\n Curr node: " << current.node << endl;
+        cout << "\nCurr node: " << current.node << endl;
         cout << "Path: ";
         for (char c : current.path) cout << c << " ";
-        cout << "\n Curr g_cost: " << current.g_cost << ", f_cost: " << current.f_cost << endl;
+        cout << "\nCurr g_cost: " << current.g_cost << ", f_cost: " << current.f_cost << endl;
 
         if (current.node == goal) {
-            cout << "\n Goal found  \n";
+            cout << "\nGoal found\n";
             return {current.path, current.g_cost};
         }
 
@@ -42,7 +42,7 @@ pair<vector<char>, int> aStarSearch(
 
         visited.insert(current.node);
 
-        for (auto &neighbor_pair : edges[current.node]) {
+        for (auto &neighbor_pair : graph[current.node]) {
             char neighbor = neighbor_pair.first;
             int edge_cost = neighbor_pair.second;
 
@@ -52,15 +52,15 @@ pair<vector<char>, int> aStarSearch(
                 vector<char> new_path = current.path;
                 new_path.push_back(neighbor);
 
-                cout << "Adding neighbor: " << neighbor 
+                cout << "Adding neighbor: " << neighbor
                      << " with edge cost: " << edge_cost
-                     << ", new g_cost: " << new_g_cost 
-                     << ", heuristic: " << heuristic[neighbor] 
+                     << ", new g_cost: " << new_g_cost
+                     << ", heuristic: " << heuristic[neighbor]
                      << ", new f_cost: " << new_f_cost << endl;
 
                 pq.push({new_f_cost, new_g_cost, neighbor, new_path});
             } else {
-                cout  << neighbor << " already visited so skip.\n";
+                cout << neighbor << " already visited so skip.\n";
             }
         }
     }
@@ -70,32 +70,30 @@ pair<vector<char>, int> aStarSearch(
 }
 
 int main() {
-    unordered_map<char, unordered_map<char, int>> graph_edges = {
-        {'A', {{'B', 1}, {'C', 4}}},
-        {'B', {{'D', 2}, {'E', 5}}},
-        {'C', {{'F', 1}}},
-        {'D', {{'G', 3}}},
-        {'E', {{'G', 1}}},
-        {'F', {{'G', 2}}},
-        {'G', {}}
-    };
+    unordered_map<char, vector<pair<char, int>>> graph;
+    graph['S'] = {{'A', 3}, {'B', 5}};
+    graph['A'] = {{'D', 3}, {'B', 4}};
+    graph['B'] = {{'A', 4}, {'C', 4}};
+    graph['C'] = {{'E', 6}};
+    graph['D'] = {{'A', 3}, {'G', 5}};
+    graph['E'] = {{'C', 6}};
+    graph['G'] = {{'D', 5}};
 
     unordered_map<char, int> heuristic = {
-        {'A', 7}, {'B', 6}, {'C', 5}, {'D', 4},
-        {'E', 2}, {'F', 3}, {'G', 0}
+        {'S', 10}, {'A', 7}, {'B', 6}, {'C', 7}, {'D', 5}, {'E', 6}, {'G', 0}
     };
 
-    char start = 'A';
-    char goal = 'G';
+    char start_node = 'S';
+    char goal_node = 'G';
 
-    auto [path, cost] = aStarSearch(graph_edges, heuristic, start, goal);
+    auto [path, cost] = aStarSearch(graph, heuristic, start_node, goal_node);
 
     if (!path.empty()) {
-        cout << "\n Path from " << start << " to " << goal << ": ";
+        cout << "\nPath from " << start_node << " to " << goal_node << ": ";
         for (char c : path) cout << c << " ";
-        cout << "\n Path cost: " << cost << "\n";
+        cout << "\nPath cost: " << cost << "\n";
     } else {
-        cout << "\n No valid path found.\n";
+        cout << "\nNo valid path found.\n";
     }
 
     return 0;
